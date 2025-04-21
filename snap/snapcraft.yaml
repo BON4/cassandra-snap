@@ -1,0 +1,164 @@
+name: cassandra
+base: core24
+
+version: 5.0.4
+
+summary: 'TODO'
+description: 'TODO'
+
+grade: stable
+confinement: devmode
+
+platforms:
+  amd64:
+
+title: Appache Cassandra
+website: https://github.com/apache/cassandra
+license: Apache License 2.0
+
+system-usernames:
+  snap_daemon: shared
+
+
+plugs:
+  shmem-perf-analyzer:
+    interface: shared-memory
+    private: true
+
+  sys-fs-cgroup-service:
+    interface: system-files
+    read:
+      - /sys/fs/cgroup/system.slice/snap.cassandra.daemon.service
+
+slots:
+  logs:
+    interface: content
+    source:
+      read:
+        - $SNAP_COMMON/var/log/cassandra
+
+hooks:
+  install:
+    plugs:
+      - network
+      - network-bind
+      - shmem-perf-analyzer
+    environment:
+      OPS_ROOT: ${SNAP_CURRENT}/opt/opensearch
+
+environment:
+  SNAP_CURRENT: /snap/cassandra/current
+  SNAP_DATA_CURRENT: /var/snap/cassandra/current
+  JAVA_HOME: ${SNAP}/usr/lib/jvm/java-21-openjdk-amd64
+  PATH: ${JAVA_HOME}/jre/bin:$PATH
+  HOME: ${SNAP_COMMON}/home/snap_daemon
+
+  SNAP_LOG_DIR: ${SNAP_COMMON}/ops/snap/logs
+  OPS_ROOT: ${SNAP_CURRENT}/opt/cassandra
+
+  CASSANDRA_BIN: ${SNAP_CURRENT}/opt/cassandra/bin/cassandra
+
+  CASSANDRA_HOME: ${SNAP_DATA_CURRENT}/opt/cassandra
+  PATH: ${CASSANDRA_HOME}:$PATH
+
+  CASSANDRA_CONF: ${SNAP_DATA_CURRENT}/etc/cassandra
+  OPENSEARCH_PATH_CERTS: ${SNAP_DATA_CURRENT}/etc/opensearch/certificates
+  
+  
+
+
+apps:
+  daemon:
+    command: TODO
+    install-mode: disable
+    restart-condition: always
+    restart-delay: 20s
+    plugs:
+      - network
+      - network-bind
+      - hardware-observe
+      - log-observe
+      - mount-observe
+      - process-control
+      - shmem-perf-analyzer
+      - system-observe
+      - sys-fs-cgroup-service
+
+parts:
+  dependencies:
+    plugin: nil
+    stage-snaps:
+      - yq
+    stage-packages:
+      - openjdk-21-jre-headless
+      - curl
+      - net-tools
+      - lsof
+      - procps
+      - python3
+      - libjemalloc2
+      - libsnappy1v5
+      - libzstd1
+      - libaio1
+      - iproute2
+      - numactl
+      - ldconfig
+
+  cassandra:
+    plugin: nil
+    build-packages:
+      - ca-certificates
+      - ca-certificates-java
+      - ssl-cert
+      - openssl
+      - openjdk-21-jre-headless
+    stage-packages:
+      - openjdk-21-jdk-headless
+    override-build: |
+      # update deps
+      apt-get update; apt-get upgrade -y; apt-get autoremove --purge -y; apt-get clean -y
+      update-ca-certificates -f
+
+      # setup trust store
+      trust_store="${CRAFT_PART_INSTALL}/etc/ssl/certs/java/"
+      mkdir -p "${trust_store}"
+      cp /etc/ssl/certs/java/cacerts "${trust_store}"
+
+      # download cassandra tarball
+      version="$(craftctl get version)"
+      patch="ubuntu1"
+
+      archive="cassandra-${version}-${patch}-linux-x64.tar.gz"
+      url="https://dlcdn.apache.org/cassandra/${version}/apache-cassandra-${version}-bin.tar.gz"
+      curl -L -o "${archive}" "${url}"
+      tar -xzvf "${archive}" -C "${CRAFT_PART_INSTALL}/" --strip-components=1
+
+      mkdir -p "${CRAFT_PART_INSTALL}/opt/cassandra"
+
+      mkdir -p "${CRAFT_PART_INSTALL}/etc/cassandra/"
+      mv "${CRAFT_PART_INSTALL}"/conf/* "${CRAFT_PART_INSTALL}/etc/opensearch/"
+
+      declare -a resources=(
+          bin lib tools pylib doc LICENSE.txt NOTICE.txt
+      )
+      for res in "${resources[@]}"; do
+          mv "${CRAFT_PART_INSTALL}/${res}" "${CRAFT_PART_INSTALL}/opt/cassandra"
+
+          target="${CRAFT_PART_INSTALL}/opt/cassandra/$(basename "${res}")"
+      
+          if [ -d "${target}" ]; then
+              chmod -R 755 "${target}"
+          elif [ -f "${target}" ]; then
+              chmod 644 "${target}"
+          fi
+      done
+
+      # Final clean-up
+      rm "${archive}"
+
+      declare -a resources=(CHANGES.txt NEWS.txt CASSANDRA-*.txt .snyk)
+      for res in "${resources[@]}"; do
+          rm -rf "${CRAFT_PART_INSTALL}/${res}"
+      done
+    
+  
