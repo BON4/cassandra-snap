@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+
+set -eux
+
+
+source "${OPS_ROOT}"/helpers/snap-logger.sh "hook-install"
+source "${OPS_ROOT}"/helpers/io.sh
+source "${OPS_ROOT}"/helpers/set-conf.sh
+
+
+function create_file_structure () {
+
+    mkdir -p "${CASSANDRA_CONF}/"
+    copy_files_between_folder "${SNAP}/etc/cassandra/" "${CASSANDRA_CONF}/"
+
+    declare -a folders=("${CASSANDRA_HOME}" "${CASSANDRA_LOG_DIR}" "${HOME}" "${CASSANDRA_HINTS_DIR}" "${CASSANDRA_DATA_DIR}" "${CASSANDRA_COMMIT_LOG_DIR}" "${CASSANDRA_SAVED_CACHES_DIR}")
+    for f in "${folders[@]}"; do
+        if [ ! -d "${f}" ]; then
+            add_folder "${f}" 775
+        fi
+    done
+}
+
+function set_base_config_props () {
+    set_yaml_prop "${CASSANDRA_CONF}/cassandra.yaml" "hints_directory" "${CASSANDRA_HINTS_DIR}"
+    set_yaml_prop "${CASSANDRA_CONF}/cassandra.yaml" "data_file_directories" "[${CASSANDRA_DATA_DIR}]"
+    set_yaml_prop "${CASSANDRA_CONF}/cassandra.yaml" "commitlog_directory" "${CASSANDRA_COMMIT_LOG_DIR}"
+    set_yaml_prop "${CASSANDRA_CONF}/cassandra.yaml" "saved_caches_directory" "${CASSANDRA_SAVED_CACHES_DIR}"
+}
+
+create_file_structure
+set_base_config_props
+
+declare -a folders=("${SNAP_DATA}")
+for f in "${folders[@]}"; do
+    chown -R snap_daemon "${f}/"*
+    chgrp root "${f}/"*
+done

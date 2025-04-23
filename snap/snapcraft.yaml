@@ -14,7 +14,7 @@ platforms:
 
 title: Appache Cassandra
 website: https://github.com/apache/cassandra
-license: Apache License 2.0
+license: Apache-2.0
 
 system-usernames:
   snap_daemon: shared
@@ -44,32 +44,39 @@ hooks:
       - network-bind
       - shmem-perf-analyzer
     environment:
-      OPS_ROOT: ${SNAP_CURRENT}/opt/opensearch
+      OPS_ROOT: ${SNAP_CURRENT}/opt/cassandra
 
 environment:
   SNAP_CURRENT: /snap/cassandra/current
   SNAP_DATA_CURRENT: /var/snap/cassandra/current
   JAVA_HOME: ${SNAP}/usr/lib/jvm/java-21-openjdk-amd64
-  PATH: ${JAVA_HOME}/jre/bin:$PATH
   HOME: ${SNAP_COMMON}/home/snap_daemon
 
   SNAP_LOG_DIR: ${SNAP_COMMON}/ops/snap/logs
   OPS_ROOT: ${SNAP_CURRENT}/opt/cassandra
 
-  CASSANDRA_BIN: ${SNAP_CURRENT}/opt/cassandra/bin/cassandra
+  CASSANDRA_BIN: ${SNAP_CURRENT}/opt/cassandra/bin
 
   CASSANDRA_HOME: ${SNAP_DATA_CURRENT}/opt/cassandra
-  PATH: ${CASSANDRA_HOME}:$PATH
 
+  CASSANDRA_LIB_DIR: ${CASSANDRA_HOME}/lib
+  
   CASSANDRA_CONF: ${SNAP_DATA_CURRENT}/etc/cassandra
-  OPENSEARCH_PATH_CERTS: ${SNAP_DATA_CURRENT}/etc/opensearch/certificates
-  
-  
+    
+  PATH: ${CASSANDRA_HOME}:${JAVA_HOME}/jre/bin:$PATH
+
+  CASSANDRA_LOG_DIR: ${SNAP_COMMON}/var/log/cassandra
+
+  CASSANDRA_HINTS_DIR: ${SNAP_COMMON}/var/lib/cassandra/hints
+  CASSANDRA_DATA_DIR: ${SNAP_COMMON}/var/lib/cassandra/data
+  CASSANDRA_COMMIT_LOG_DIR: ${SNAP_COMMON}/var/lib/cassandra/commitlog
+  CASSANDRA_SAVED_CACHES_DIR: ${SNAP_COMMON}/var/lib/cassandra/saved_caches
 
 
 apps:
   daemon:
-    command: TODO
+    daemon: simple
+    command: opt/cassandra/start.sh
     install-mode: disable
     restart-condition: always
     restart-delay: 20s
@@ -84,12 +91,21 @@ apps:
       - system-observe
       - sys-fs-cgroup-service
 
+  cassandra-bin:
+    command: opt/cassandra/bin-wrapper.sh
+    plugs:
+      - network
+      - network-bind
+    environment:
+      bin_script: cassandra
+
 parts:
   dependencies:
     plugin: nil
     stage-snaps:
       - yq
     stage-packages:
+      - util-linux
       - openjdk-21-jre-headless
       - curl
       - net-tools
@@ -99,10 +115,18 @@ parts:
       - libjemalloc2
       - libsnappy1v5
       - libzstd1
-      - libaio1
       - iproute2
       - numactl
-      - ldconfig
+
+  wrapper-scripts:
+    plugin: nil
+    source: ./scripts
+    source-type: local
+    override-build: |
+      target_dir="${CRAFT_PART_INSTALL}/opt/cassandra"
+      mkdir -p "${target_dir}"
+      cp -r wrappers/. "${target_dir}"
+      cp -r helpers/ "${target_dir}/helpers"
 
   cassandra:
     plugin: nil
@@ -135,8 +159,8 @@ parts:
 
       mkdir -p "${CRAFT_PART_INSTALL}/opt/cassandra"
 
-      mkdir -p "${CRAFT_PART_INSTALL}/etc/cassandra/"
-      mv "${CRAFT_PART_INSTALL}"/conf/* "${CRAFT_PART_INSTALL}/etc/opensearch/"
+      mkdir -p "${CRAFT_PART_INSTALL}/etc/cassandra"
+      mv "${CRAFT_PART_INSTALL}"/conf/* "${CRAFT_PART_INSTALL}/etc/cassandra/"
 
       declare -a resources=(
           bin lib tools pylib doc LICENSE.txt NOTICE.txt
