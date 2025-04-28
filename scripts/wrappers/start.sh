@@ -17,7 +17,7 @@ function start_cassandra () {
         --clear-groups \
         --reuid snap_daemon \
         --regid snap_daemon -- \
-        "${CASSANDRA_BIN}"/cassandra
+        "${CASSANDRA_BIN}"/cassandra -f
 }
 
 

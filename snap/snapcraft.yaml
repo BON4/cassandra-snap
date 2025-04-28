@@ -49,7 +49,7 @@ hooks:
 environment:
   SNAP_CURRENT: /snap/cassandra/current
   SNAP_DATA_CURRENT: /var/snap/cassandra/current
-  JAVA_HOME: ${SNAP}/usr/lib/jvm/java-21-openjdk-amd64
+  JAVA_HOME: ${SNAP}/usr/lib/jvm/java-11-openjdk-amd64
   HOME: ${SNAP_COMMON}/home/snap_daemon
 
   SNAP_LOG_DIR: ${SNAP_COMMON}/ops/snap/logs
@@ -91,6 +91,12 @@ apps:
       - system-observe
       - sys-fs-cgroup-service
 
+  test-node-status:
+    command: opt/cassandra/tests/test-node-status.sh
+    plugs:
+      - network
+      - network-bind
+
   cassandra-bin:
     command: opt/cassandra/bin-wrapper.sh
     plugs:
@@ -99,6 +105,30 @@ apps:
     environment:
       bin_script: cassandra
 
+  nodetool:
+    command: opt/cassandra/bin-wrapper.sh
+    plugs:
+      - network
+      - network-bind
+    environment:
+      bin_script: nodetool
+
+  stop-server:
+    command: opt/cassandra/bin-wrapper.sh
+    plugs:
+      - network
+      - network-bind
+    environment:
+      bin_script: stop-server
+
+  cqlsh:
+    command: opt/cassandra/bin-wrapper.sh
+    plugs:
+      - network
+      - network-bind
+    environment:
+      bin_script: cqlsh
+
 parts:
   dependencies:
     plugin: nil
@@ -106,7 +136,7 @@ parts:
       - yq
     stage-packages:
       - util-linux
-      - openjdk-21-jre-headless
+      - openjdk-11-jre-headless
       - curl
       - net-tools
       - lsof
@@ -135,9 +165,9 @@ parts:
       - ca-certificates-java
       - ssl-cert
       - openssl
-      - openjdk-21-jre-headless
+      - openjdk-11-jre-headless
     stage-packages:
-      - openjdk-21-jdk-headless
+      - openjdk-11-jdk-headless
     override-build: |
       # update deps
       apt-get update; apt-get upgrade -y; apt-get autoremove --purge -y; apt-get clean -y
