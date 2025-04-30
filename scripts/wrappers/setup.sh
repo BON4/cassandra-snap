@@ -136,7 +136,7 @@ function setup_tls () {
             --node-subject "${tls_node_subject}" \
             --target-dir "${CASSANDRA_PATH_CERTS}"
 
-        for key in node-${node_host} node-${node_host}-key keystore.jks truststore.jks; do
+        for key in node-${node_host}.pem node-${node_host}-key.pem keystore.jks truststore.jks; do
             set_access_restrictions "${TLS_DIR}/${key}" 664
         done
 
