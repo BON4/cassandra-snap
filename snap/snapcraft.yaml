@@ -62,6 +62,7 @@ environment:
   CASSANDRA_LIB_DIR: ${CASSANDRA_HOME}/lib
   
   CASSANDRA_CONF: ${SNAP_DATA_CURRENT}/etc/cassandra
+  CASSANDRA_PATH_CERTS: ${SNAP_DATA_CURRENT}/etc/cassandra/certificates
     
   PATH: ${CASSANDRA_HOME}:${JAVA_HOME}/jre/bin:$PATH
 
@@ -128,6 +129,11 @@ apps:
       - network-bind
     environment:
       bin_script: cqlsh
+
+  keytool:
+    command: usr/lib/jvm/java-11-openjdk-amd64/bin/keytool
+    plugs:
+      - mount-observe
 
 parts:
   dependencies:
