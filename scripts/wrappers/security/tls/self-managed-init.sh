@@ -2,6 +2,8 @@
 
 set -eu
 
+source "${OPS_ROOT}"/helpers/snap-logger.sh "self-managed-init"
+
 usage() {
 cat << EOF
 Usage: self-managed-init.sh --root-password <password> --admin-password <password> --target-dir <path>
@@ -18,8 +20,8 @@ EOF
 # Arguments
 ROOT_PASS=""
 ADMIN_PASS=""
-ROOT_SUBJ="/CN=Root Cassandra CA"
-ADMIN_SUBJ="/CN=Admin Cassandra Client"
+ROOT_SUBJ=""
+ADMIN_SUBJ=""
 TARGET_DIR=""
 
 parse_args() {
@@ -41,6 +43,9 @@ parse_args() {
         usage
         exit 1
     fi
+
+    ROOT_SUBJ="${ROOT_SUBJ:-/C=UK/ST=London/L=London/O=Canonical/OU=DataPlatform/CN=localhost}"
+    ADMIN_SUBJ="${ADMIN_SUBJ:-/C=UK/ST=London/L=London/O=Canonical/OU=DataPlatform/CN=admin}"
 }
 
 generate_root_cert() {

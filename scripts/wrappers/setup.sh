@@ -10,9 +10,9 @@ usage() {
 cat << EOF
 usage: init.sh --root-password password ...
 To be ran / setup once per cluster.
---cluster-name            (Required)  Name of the cluster
---node-host               (Required)  IP address used to bind the node, default: localhost
---seed-hosts              (Required)  Private IP of all the cluster-manager eligible nodes, wihtout ports specified default: ["127.0.0.1:7000"]
+--cluster-name            (Optional)  Name of the cluster
+--node-host               (Optional)  IP address used to bind the node, default: localhost
+--seed-hosts              (Optional)  Private IP of all the cluster-manager eligible nodes separated by coma, wihtout ports specified default: "127.0.0.1:7000"
 --endpoint-snitch         (Optional)  Sets the snitch type that Cassandra uses to determine node topology (e.g., SimpleSnitch, GossipingPropertyFileSnitch). Default is [SimpleSnitch].
 --tls-self-managed        (Optional)  Enable self-managed TLS
 --tls-init-setup          (Optional)  Run initial TLS root/admin cert creation
@@ -59,6 +59,8 @@ function parse_args() {
         "tls-node-subject"
         "help"
     )
+    
+    # shellcheck disable=SC2155
     local opts=$(getopt \
       --longoptions "$(printf "%s:," "${LONG_OPTS_LIST[@]}")" \
       --name "$(readlink -f "${BASH_SOURCE}")" \
@@ -97,7 +99,7 @@ function set_defaults () {
     fi
 
     if [ -z "${seed_hosts}" ]; then
-        seed_hosts="[ \"127.0.0.1:7000\" ]"
+        seed_hosts="127.0.0.1:7000"
     fi
 
     if [ -z "${endpoint_snitch}" ]; then
@@ -125,7 +127,7 @@ function setup_tls () {
                 --target-dir "${CASSANDRA_PATH_CERTS}"
 
             for key in root-ca root-ca-key admin admin-key; do
-                set_access_restrictions "${TLS_DIR}/${key}.pem" 664
+                set_access_restrictions "${CASSANDRA_PATH_CERTS}/${key}.pem" 664
             done
         fi
 
@@ -137,18 +139,20 @@ function setup_tls () {
             --target-dir "${CASSANDRA_PATH_CERTS}"
 
         for key in node-${node_host}.pem node-${node_host}-key.pem keystore.jks truststore.jks; do
-            set_access_restrictions "${TLS_DIR}/${key}" 664
+            set_access_restrictions "${CASSANDRA_PATH_CERTS}/${key}" 664
         done
 
         # Apply Cassandra TLS config
         cassandra_yaml="${CASSANDRA_CONF}/cassandra.yaml"
-        set_yaml_prop "${cassandra_yaml}" "client_encryption_options.enabled" true
-        set_yaml_prop "${cassandra_yaml}" "client_encryption_options.optional" false
-        set_yaml_prop "${cassandra_yaml}" "client_encryption_options.require_client_auth" true
-        set_yaml_prop "${cassandra_yaml}" "client_encryption_options.keystore" "${TLS_DIR}/keystore.jks"
-        set_yaml_prop "${cassandra_yaml}" "client_encryption_options.keystore_password" "${tls_priv_key_node_pass}"
-        set_yaml_prop "${cassandra_yaml}" "client_encryption_options.truststore" "${TLS_DIR}/truststore.jks"
-        set_yaml_prop "${cassandra_yaml}" "client_encryption_options.truststore_password" "${tls_priv_key_node_pass}"
+        set_yaml_prop "${cassandra_yaml}" "client_encryption_options/enabled" true
+        set_yaml_prop "${cassandra_yaml}" "client_encryption_options/optional" false
+        set_yaml_prop "${cassandra_yaml}" "client_encryption_options/require_client_auth" true
+        set_yaml_prop "${cassandra_yaml}" "client_encryption_options/keystore" "${CASSANDRA_PATH_CERTS}/keystore.jks"
+        set_yaml_prop "${cassandra_yaml}" "client_encryption_options/keystore_password" "${tls_priv_key_node_pass}"
+        set_yaml_prop "${cassandra_yaml}" "client_encryption_options/truststore" "${CASSANDRA_PATH_CERTS}/truststore.jks"
+        set_yaml_prop "${cassandra_yaml}" "client_encryption_options/truststore_password" "${tls_priv_key_node_pass}"
+        set_yaml_prop "${cassandra_yaml}" "client_encryption_options/protocol" "TLS"
+        set_yaml_prop "${cassandra_yaml}" "client_encryption_options/cipher_suites" "[TLS_RSA_WITH_AES_128_CBC_SHA256]"	
     fi
 }
 
@@ -160,5 +164,6 @@ setup_tls
 cassandra_yaml="${CASSANDRA_CONF}/cassandra.yaml"
 set_yaml_prop "${cassandra_yaml}" "cluster_name" "${cluster_name}"
 set_yaml_prop "${cassandra_yaml}" "listen_address" "${node_host}"
+# TODO. seeds may be set incorectly if many is provided
 set_yaml_prop "${cassandra_yaml}" "seed_provider/[0]/parameters/[0]/seeds" "${seed_hosts}"
 set_yaml_prop "${cassandra_yaml}" "endpoint_snitch" "${endpoint_snitch}"

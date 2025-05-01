@@ -2,6 +2,8 @@
 
 set -eu
 
+source "${OPS_ROOT}"/helpers/snap-logger.sh "self-managed-node"
+
 usage() {
 cat << EOF
 Usage: self-managed-node.sh --name <node-name> --root-password <password> --node-password <password> --target-dir <path>
@@ -19,7 +21,7 @@ EOF
 NODE_NAME=""
 NODE_PASS=""
 ROOT_PASS=""
-NODE_SUBJ="/CN=Cassandra Node"
+NODE_SUBJ=""
 TARGET_DIR=""
 
 parse_args() {
@@ -41,6 +43,9 @@ parse_args() {
         usage
         exit 1
     fi
+
+
+    NODE_SUBJ="${NODE_SUBJ:-/C=UK/ST=London/L=London/O=Canonical/OU=DataPlatform/CN=${NODE_NAME}}"
 }
 
 generate_node_cert() {

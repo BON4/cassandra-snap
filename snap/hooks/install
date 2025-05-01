@@ -11,7 +11,7 @@ source "${OPS_ROOT}"/helpers/set-conf.sh
 function create_file_structure () {
 
 
-    declare -a folders=("${CASSANDRA_CONF}" "${CASSANDRA_HOME}" "${CASSANDRA_LOG_DIR}" "${HOME}" "${CASSANDRA_HINTS_DIR}" "${CASSANDRA_DATA_DIR}" "${CASSANDRA_COMMIT_LOG_DIR}" "${CASSANDRA_SAVED_CACHES_DIR}")
+    declare -a folders=("${CASSANDRA_CONF}" "${CASSANDRA_HOME}" "${CASSANDRA_LOG_DIR}" "${HOME}" "${CASSANDRA_HINTS_DIR}" "${CASSANDRA_DATA_DIR}" "${CASSANDRA_COMMIT_LOG_DIR}" "${CASSANDRA_SAVED_CACHES_DIR}" "${CASSANDRA_PATH_CERTS}")
     for f in "${folders[@]}"; do
         if [ ! -d "${f}" ]; then
             add_folder "${f}" 775

@@ -64,7 +64,7 @@ environment:
   CASSANDRA_CONF: ${SNAP_DATA_CURRENT}/etc/cassandra
   CASSANDRA_PATH_CERTS: ${SNAP_DATA_CURRENT}/etc/cassandra/certificates
     
-  PATH: ${CASSANDRA_HOME}:${JAVA_HOME}/jre/bin:$PATH
+  PATH: ${CASSANDRA_HOME}:${JAVA_HOME}/bin:$PATH
 
   CASSANDRA_LOG_DIR: ${SNAP_COMMON}/var/log/cassandra
 
@@ -72,6 +72,8 @@ environment:
   CASSANDRA_DATA_DIR: ${SNAP_COMMON}/var/lib/cassandra/data
   CASSANDRA_COMMIT_LOG_DIR: ${SNAP_COMMON}/var/lib/cassandra/commitlog
   CASSANDRA_SAVED_CACHES_DIR: ${SNAP_COMMON}/var/lib/cassandra/saved_caches
+
+  USER_SPECIFIED_PYTHON: ${SNAP_CURRENT}/usr/bin/python3.9 # needed for cqlsh, becouse it is not compatible with default v3.12
 
 
 apps:
@@ -97,6 +99,9 @@ apps:
     plugs:
       - network
       - network-bind
+
+  setup:
+    command: opt/cassandra/setup.sh
 
   cassandra-bin:
     command: opt/cassandra/bin-wrapper.sh
@@ -135,6 +140,11 @@ apps:
     plugs:
       - mount-observe
 
+package-repositories:
+  - type: apt
+    ppa: deadsnakes/ppa
+    priority: always
+
 parts:
   dependencies:
     plugin: nil
@@ -147,13 +157,12 @@ parts:
       - net-tools
       - lsof
       - procps
-      - python3
       - libjemalloc2
       - libsnappy1v5
       - libzstd1
       - iproute2
       - numactl
-
+      
   wrapper-scripts:
     plugin: nil
     source: ./scripts
@@ -174,6 +183,7 @@ parts:
       - openjdk-11-jre-headless
     stage-packages:
       - openjdk-11-jdk-headless
+      - python3.9 
     override-build: |
       # update deps
       apt-get update; apt-get upgrade -y; apt-get autoremove --purge -y; apt-get clean -y
