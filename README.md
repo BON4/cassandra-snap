@@ -14,5 +14,6 @@
 
 ```
 
-### 
+### Start
+`sudo snap start cassandra.daemon`
 
