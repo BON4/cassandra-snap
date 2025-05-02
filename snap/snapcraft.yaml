@@ -59,7 +59,7 @@ environment:
 
   CASSANDRA_HOME: ${SNAP_DATA_CURRENT}/opt/cassandra
 
-  CASSANDRA_LIB_DIR: ${CASSANDRA_HOME}/lib
+  CASSANDRA_LIB: ${CASSANDRA_HOME}/lib
   
   CASSANDRA_CONF: ${SNAP_DATA_CURRENT}/etc/cassandra
   CASSANDRA_PATH_CERTS: ${SNAP_DATA_CURRENT}/etc/cassandra/certificates

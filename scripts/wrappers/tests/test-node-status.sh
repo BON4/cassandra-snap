@@ -3,7 +3,7 @@ set -e
 
 echo "Running nodetool status..."
 
-OUTPUT=$(nodetool status)
+OUTPUT=$(${CASSANDRA_BIN}/nodetool status)
 
 echo "$OUTPUT"
 
