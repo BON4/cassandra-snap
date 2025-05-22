@@ -3,9 +3,9 @@
 set -eux
 
 
-source "${OPS_ROOT}"/helpers/snap-logger.sh "hook-install"
-source "${OPS_ROOT}"/helpers/io.sh
-source "${OPS_ROOT}"/helpers/set-conf.sh
+source "${CASSANDRA_ROOT}"/helpers/snap-logger.sh "hook-install"
+source "${CASSANDRA_ROOT}"/helpers/io.sh
+source "${CASSANDRA_ROOT}"/helpers/set-conf.sh
 
 
 function create_file_structure () {

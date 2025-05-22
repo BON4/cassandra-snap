@@ -44,7 +44,7 @@ hooks:
       - network-bind
       - shmem-perf-analyzer
     environment:
-      OPS_ROOT: ${SNAP_CURRENT}/opt/cassandra
+      CASSANDRA_ROOT: ${SNAP_CURRENT}/opt/cassandra
 
 environment:
   SNAP_CURRENT: /snap/cassandra/current
@@ -53,7 +53,7 @@ environment:
   HOME: ${SNAP_COMMON}/home/snap_daemon
 
   SNAP_LOG_DIR: ${SNAP_COMMON}/ops/snap/logs
-  OPS_ROOT: ${SNAP_CURRENT}/opt/cassandra
+  CASSANDRA_ROOT: ${SNAP_CURRENT}/opt/cassandra
 
   CASSANDRA_BIN: ${SNAP_CURRENT}/opt/cassandra/bin
   CASSANDRA_TOOLS_BIN: ${SNAP_CURRENT}/opt/cassandra/tools/bin
@@ -65,7 +65,7 @@ environment:
   CASSANDRA_CONF: ${SNAP_DATA_CURRENT}/etc/cassandra
   CASSANDRA_PATH_CERTS: ${SNAP_DATA_CURRENT}/etc/cassandra/certificates
     
-  PATH: ${CASSANDRA_HOME}:${JAVA_HOME}/bin:$PATH
+  PATH: ${CASSANDRA_BIN}:${CASSANDRA_HOME}:${JAVA_HOME}/bin:$PATH
 
   CASSANDRA_LOG_DIR: ${SNAP_COMMON}/var/log/cassandra
 
@@ -74,6 +74,11 @@ environment:
   CASSANDRA_COMMIT_LOG_DIR: ${SNAP_COMMON}/var/lib/cassandra/commitlog
   CASSANDRA_SAVED_CACHES_DIR: ${SNAP_COMMON}/var/lib/cassandra/saved_caches
 
+  MGMT_API_DIR: /snap/cassandra/current/opt/mgmt-api
+  MGMT_API_PORT: 8080
+  MGMT_API_LOG_DIR: ${CASSANDRA_LOG_DIR}
+  MGMT_API_DISABLE_MCAC: "true"
+
   USER_SPECIFIED_PYTHON: ${SNAP_CURRENT}/usr/bin/python3.9 # needed for cqlsh, becouse it is not compatible with default v3.12
 
 
@@ -81,6 +86,23 @@ apps:
   daemon:
     daemon: simple
     command: opt/cassandra/start.sh
+    install-mode: disable
+    restart-condition: always
+    restart-delay: 20s
+    plugs:
+      - network
+      - network-bind
+      - hardware-observe
+      - log-observe
+      - mount-observe
+      - process-control
+      - shmem-perf-analyzer
+      - system-observe
+      - sys-fs-cgroup-service
+
+  mgmt-server:
+    daemon: simple
+    command: opt/cassandra/start.sh --with-api
     install-mode: disable
     restart-condition: always
     restart-delay: 20s
@@ -179,6 +201,16 @@ parts:
       mkdir -p "${target_dir}"
       cp -r wrappers/. "${target_dir}"
       cp -r helpers/ "${target_dir}/helpers"
+
+  mgmt-api:
+    plugin: nil
+    source: https://github.com/k8ssandra/management-api-for-apache-cassandra/releases/download/v0.1.104/jars.zip
+    build-packages:
+      - unzip
+    override-build: |
+      mkdir -p ${CRAFT_PART_INSTALL}/opt/mgmt-api
+      cp management-api-agent-5.0.x/target/datastax-mgmtapi-agent-5.0.x-0.1.104.jar -d ${CRAFT_PART_INSTALL}/opt/mgmt-api/datastax-mgmtapi-agent.jar
+      cp management-api-server/target/datastax-mgmtapi-server-0.1.104.jar -d ${CRAFT_PART_INSTALL}/opt/mgmt-api/datastax-mgmtapi-server.jar
 
   cassandra:
     plugin: nil
