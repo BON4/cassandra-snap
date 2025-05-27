@@ -191,6 +191,7 @@ parts:
       - libzstd1
       - iproute2
       - numactl
+      - libev4 #TODO: remove in future. This is needed for python cassandra-driver package to work in charm
       
   wrapper-scripts:
     plugin: nil
