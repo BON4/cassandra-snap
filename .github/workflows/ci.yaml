@@ -99,3 +99,4 @@ jobs:
         run: |
              set -e
              sudo snap run cassandra.test_node_status
+
