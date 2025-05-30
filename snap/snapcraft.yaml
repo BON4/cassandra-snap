@@ -19,7 +19,6 @@ license: Apache-2.0
 system-usernames:
   snap_daemon: shared
 
-
 plugs:
   shmem-perf-analyzer:
     interface: shared-memory
@@ -191,7 +190,7 @@ parts:
       - libzstd1
       - iproute2
       - numactl
-      - libev4 #TODO: remove in future. This is needed for python cassandra-driver package to work in charm
+      - libev4t64 #TODO: remove in future. This is needed for python cassandra-driver package to work in charm
       
   wrapper-scripts:
     plugin: nil
@@ -201,7 +200,7 @@ parts:
       target_dir="${CRAFT_PART_INSTALL}/opt/cassandra"
       mkdir -p "${target_dir}"
       cp -r wrappers/. "${target_dir}"
-      cp -r helpers/ "${target_dir}/helpers"
+      cp -r helpers/ "${target_dir}/helpers"  
 
   mgmt-api:
     plugin: nil

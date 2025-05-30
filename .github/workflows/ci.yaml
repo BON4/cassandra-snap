@@ -1,0 +1,109 @@
+name: Build and Test
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  workflow_call:
+  pull_request:
+
+jobs:
+  build:
+    name: Build Snap
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    outputs:
+      snap-file: ${{ steps.build-snap.outputs.snap }}
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - id: build-snap
+        name: Build snap
+        uses: snapcore/action-build@v1
+
+      - name: Upload built snap job artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: cassandra_snap_amd64
+          path: "cassandra_*.snap"
+
+  test:
+    name: Test Snap
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs:
+      - build
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Install required dependencies
+        run: |
+          sudo snap install yq
+
+      - name: Download snap file
+        uses: actions/download-artifact@v4
+        with:
+          name: cassandra_snap_amd64
+          path: .
+
+      - name: Install snap file
+        run: |
+          version="$(cat snap/snapcraft.yaml | yq .version)"
+          
+          sudo snap remove --purge cassandra
+          sudo snap install cassandra_${version}_amd64.snap --dangerous --jailmode
+
+      - name: Connect required interfaces
+        run: |
+          sudo snap connect cassandra:log-observe
+          sudo snap connect cassandra:mount-observe
+          sudo snap connect cassandra:process-control
+          sudo snap connect cassandra:system-observe
+          sudo snap connect cassandra:sys-fs-cgroup-service
+          sudo snap connect cassandra:shmem-perf-analyzer
+
+      - name: Setup and Start Cassandra
+        run: |
+          sudo snap run cassandra.setup
+	  
+          # start cassnadra
+          sudo snap start cassandra.daemon
+
+          # wait a bit for it to fully initialize
+          sleep 40s
+
+      - name: Ensure the cluster is reachable and node created via tests
+        run: |
+	     sudo snap run cassandra.test_node_status
+             exit_code=$?
+             if [ $exit_code -ne 0 ]; then
+               echo "cassandra.test_node_status failed with exit code $exit_code"
+               exit $exit_code
+             fi
+	     
+      - name: Upgrade snap
+        run: |
+          version="$(cat snap/snapcraft.yaml | yq .version)"
+          sudo snap install cassandra_${version}_amd64.snap --dangerous --jailmode
+
+          if [ "$(ls /var/snap/cassandra/x2)" ]; then
+              echo "Snap upgraded."
+          else
+              exit 1
+          fi
+
+      - name: Ensure the cluster is reachable and node created after upgrade
+        run: |
+	     sudo snap run cassandra.test_node_status
+             exit_code=$?
+             if [ $exit_code -ne 0 ]; then
+               echo "cassandra.test_node_status failed with exit code $exit_code"
+               exit $exit_code
+             fi
