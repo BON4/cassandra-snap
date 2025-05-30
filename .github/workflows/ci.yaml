@@ -58,7 +58,7 @@ jobs:
           version="$(cat snap/snapcraft.yaml | yq .version)"
           
           sudo snap remove --purge cassandra
-          sudo snap install cassandra_${version}_amd64.snap --dangerous --jailmode
+          sudo snap install cassandra_${version}_amd64.snap --dangerous --jailmode --devmode
 
       - name: Connect required interfaces
         run: |
