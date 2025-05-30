@@ -72,7 +72,7 @@ jobs:
       - name: Setup and Start Cassandra
         run: |
           sudo snap run cassandra.setup
-	  
+  
           # start cassnadra
           sudo snap start cassandra.daemon
 
@@ -81,13 +81,9 @@ jobs:
 
       - name: Ensure the cluster is reachable and node created via tests
         run: |
-	     sudo snap run cassandra.test_node_status
-             exit_code=$?
-             if [ $exit_code -ne 0 ]; then
-               echo "cassandra.test_node_status failed with exit code $exit_code"
-               exit $exit_code
-             fi
-	     
+             set -e
+             sudo snap run cassandra.test_node_status
+     
       - name: Upgrade snap
         run: |
           version="$(cat snap/snapcraft.yaml | yq .version)"
@@ -101,9 +97,5 @@ jobs:
 
       - name: Ensure the cluster is reachable and node created after upgrade
         run: |
-	     sudo snap run cassandra.test_node_status
-             exit_code=$?
-             if [ $exit_code -ne 0 ]; then
-               echo "cassandra.test_node_status failed with exit code $exit_code"
-               exit $exit_code
-             fi
+             set -e
+             sudo snap run cassandra.test_node_status
