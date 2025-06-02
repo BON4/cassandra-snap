@@ -77,12 +77,12 @@ jobs:
           sudo snap start cassandra.daemon
 
           # wait a bit for it to fully initialize
-          sleep 40s
+          sleep 90s
 
       - name: Ensure the cluster is reachable and node created via tests
         run: |
              set -e
-             sudo snap run cassandra.test_node_status
+             sudo snap run cassandra.test-node-status
      
       - name: Upgrade snap
         run: |
@@ -98,4 +98,4 @@ jobs:
       - name: Ensure the cluster is reachable and node created after upgrade
         run: |
              set -e
-             sudo snap run cassandra.test_node_status
+             sudo snap run cassandra.test-node-status
