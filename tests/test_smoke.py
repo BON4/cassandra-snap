@@ -28,17 +28,23 @@ def cassandra_stress_available():
     except Exception:
         return False
 
-def test_install():
-    with open("snap/snapcraft.yaml") as file:
-        snapcraft = yaml.safe_load(file)
-        snap_file = f"./{snapcraft['name']}_{snapcraft['version']}_amd64.snap"
-        subprocess.run(
-            ["sudo", "snap", "install", snap_file, "--devmode"],
-            check=True,
-        )
+
+def test_cassandra_snap_installed():
+    result = subprocess.run(
+        ["snap", "list", "cassandra"],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True
+    )
+
+    assert result.returncode == 0, (
+        f"'cassandra' snap is not installed.\n"
+        f"stdout: {result.stdout}\n"
+        f"stderr: {result.stderr}"
+    )
         
-@pytest.mark.run(after="test_install")
-def check_nodetool_status():
+@pytest.mark.run(after="test_cassandra_snap_installed")
+def test_nodetool_status():
     if not is_snap_installed():
         pytest.fail("[FAILED] snap command not found")
     
@@ -61,7 +67,7 @@ def check_nodetool_status():
         raise RuntimeError("Nodetool status check failed! Node is not Up and Normal.")
         
 
-@pytest.mark.run(after="check_nodetool_status")
+@pytest.mark.run(after="test_nodetool_status")
 def test_write_stress():
     if not is_snap_installed():
         pytest.fail("[FAILED] snap command not found")
@@ -82,7 +88,7 @@ def test_write_stress():
         pytest.fail("[FAILED] WRITE test failed")
     print("[SUCCESS] WRITE test completed")
 
-@pytest.mark.run(after="check_nodetool_status")
+@pytest.mark.run(after="test_nodetool_status")
 def test_read_stress():
     if not is_snap_installed():
         pytest.fail("[FAILED] snap command not found")
