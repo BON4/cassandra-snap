@@ -86,7 +86,7 @@ environment:
 apps:
   daemon:
     daemon: simple
-    command: opt/cassandra/start.sh
+    command: opt/cassandra/bin/start-wrapper.sh
     install-mode: disable
     restart-condition: always
     restart-delay: 20s
@@ -103,7 +103,7 @@ apps:
 
   mgmt-server:
     daemon: simple
-    command: opt/cassandra/start.sh --with-api
+    command: opt/cassandra/bin/start-wrapper.sh --with-api
     install-mode: disable
     restart-condition: always
     restart-delay: 20s
@@ -119,7 +119,7 @@ apps:
       - sys-fs-cgroup-service
 
   cassandra-bin:
-    command: opt/cassandra/bin-wrapper.sh
+    command: opt/cassandra/bin/bin-wrapper.sh
     plugs:
       - network
       - network-bind
@@ -127,7 +127,7 @@ apps:
       bin_script: cassandra
 
   nodetool:
-    command: opt/cassandra/bin-wrapper.sh
+    command: opt/cassandra/bin/bin-wrapper.sh
     plugs:
       - network
       - network-bind
@@ -135,7 +135,7 @@ apps:
       bin_script: nodetool
 
   stop-server:
-    command: opt/cassandra/bin-wrapper.sh
+    command: opt/cassandra/bin/bin-wrapper.sh
     plugs:
       - network
       - network-bind
@@ -143,7 +143,7 @@ apps:
       bin_script: stop-server
 
   cqlsh:
-    command: opt/cassandra/bin-wrapper.sh
+    command: opt/cassandra/bin/bin-wrapper.sh
     plugs:
       - network
       - network-bind
@@ -151,7 +151,7 @@ apps:
       bin_script: cqlsh
 
   stress:
-    command: opt/cassandra/tool-wrapper.sh
+    command: opt/cassandra/bin/tool-wrapper.sh
     plugs:
       - network
       - network-bind
@@ -189,13 +189,17 @@ parts:
 
   wrapper-scripts:
     plugin: nil
-    source: ./scripts
+    source: ./snap/local
     source-type: local
     override-build: |
-      target_dir="${CRAFT_PART_INSTALL}/opt/cassandra"
-      mkdir -p "${target_dir}"
-      cp -r wrappers/. "${target_dir}"
-      cp -r helpers/ "${target_dir}/helpers"
+      target_cassandra_dir="${CRAFT_PART_INSTALL}/opt/cassandra/bin"
+      mkdir -p "${target_cassandra_dir}"
+
+      target_shared_dir="${CRAFT_PART_INSTALL}/opt/shared/bin"
+      mkdir -p "${target_shared_dir}"
+
+      cp -r opt/cassandra/bin/* "${target_cassandra_dir}"
+      cp -r opt/shared/bin/* "${target_shared_dir}"
 
   mgmt-api:
     plugin: nil

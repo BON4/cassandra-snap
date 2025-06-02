@@ -2,7 +2,7 @@
 
 set -eu
 
-source "${CASSANDRA_ROOT}"/helpers/snap-interfaces.sh
+source "${SNAP_CURRENT}"/opt/shared/bin/snap-interfaces.sh
 
 WITH_API=false
 
