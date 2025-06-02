@@ -41,9 +41,9 @@ jobs:
 
       - name: Install snap file
         run: |
-          version="$(cat snap/snapcraft.yaml | yq .version)"
+          version="$(yq .version < snap/snapcraft.yaml)"
           sudo snap remove --purge cassandra || true
-          sudo snap install cassandra_${version}_amd64.snap --dangerous --devmode
+          sudo snap install "cassandra_${version}_amd64.snap" --dangerous --devmode
 
       - name: Connect required interfaces
         run: |
@@ -67,8 +67,8 @@ jobs:
 
       - name: Upgrade snap
         run: |
-          version="$(cat snap/snapcraft.yaml | yq .version)"
-          sudo snap install cassandra_${version}_amd64.snap --dangerous --devmode
+          version="$(yq .version < snap/snapcraft.yaml)"
+          sudo snap install "cassandra_${version}_amd64.snap" --dangerous --devmode
 
           if [ -d /var/snap/cassandra/x2 ]; then
               echo "Snap upgraded."
