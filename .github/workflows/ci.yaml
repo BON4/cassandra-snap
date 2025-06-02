@@ -87,7 +87,7 @@ jobs:
       - name: Upgrade snap
         run: |
           version="$(cat snap/snapcraft.yaml | yq .version)"
-          sudo snap install cassandra_${version}_amd64.snap --dangerous
+          sudo snap install cassandra_${version}_amd64.snap --dangerous --devmode
 
           if [ "$(ls /var/snap/cassandra/x2)" ]; then
               echo "Snap upgraded."
