@@ -72,7 +72,7 @@ def test_write_stress():
     print("▶ Starting WRITE test...")
     try:
         run_command([
-            "snap", "run", "cassandra.stress", "write",
+            "sudo", "snap", "run", "cassandra.stress", "write",
             f"n={NUM_OPS}",
             f"cl={CL}",
             "-rate",
@@ -94,7 +94,7 @@ def test_read_stress():
     print("▶ Starting READ test...")
     try:
         run_command([
-            "snap", "run", "cassandra.stress", "read",
+            "sudo", "snap", "run", "cassandra.stress", "read",
             f"n={NUM_OPS}",
             f"cl={CL}",
             "-rate",
