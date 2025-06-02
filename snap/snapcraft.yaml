@@ -81,8 +81,6 @@ environment:
   MGMT_API_LOG_DIR: ${CASSANDRA_LOG_DIR}
   MGMT_API_DISABLE_MCAC: "true"
 
-  USER_SPECIFIED_PYTHON: ${SNAP_CURRENT}/usr/bin/python3.9
-
 apps:
   daemon:
     daemon: simple
@@ -149,6 +147,7 @@ apps:
       - network-bind
     environment:
       bin_script: cqlsh
+      USER_SPECIFIED_PYTHON: ${SNAP_CURRENT}/usr/bin/python3.9
 
   stress:
     command: opt/cassandra/bin/tool-wrapper.sh
@@ -214,10 +213,10 @@ parts:
       SERVER_JAR=management-api-server
 
       cp "$AGENT_JAR"/target/datastax-mgmtapi-agent-5.0.x-0.1.104.jar \
-      ${CRAFT_PART_INSTALL}/opt/mgmt-api/datastax-mgmtapi-agent.jarb
+      ${CRAFT_PART_INSTALL}/opt/mgmt-api/libs/datastax-mgmtapi-agent.jarb
 
       cp "$SERVER_JAR"/target/datastax-mgmtapi-server-0.1.104.jar \
-      ${CRAFT_PART_INSTALL}/opt/mgmt-api/datastax-mgmtapi-server.jar
+      ${CRAFT_PART_INSTALL}/opt/mgmt-api/libs/datastax-mgmtapi-server.jar
 
   cassandra:
     plugin: nil

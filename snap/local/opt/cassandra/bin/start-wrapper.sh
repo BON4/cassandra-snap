@@ -31,13 +31,13 @@ function start_cassandra () {
         echo "Starting Cassandra with management API..."
 
 	
-        if [ ! -f "${MGMT_API_DIR}/datastax-mgmtapi-server.jar" ]; then
-            echo "Error: ${MGMT_API_DIR}/datastax-mgmtapi-server.jar not found!"
+        if [ ! -f "${MGMT_API_DIR}/libs/datastax-mgmtapi-server.jar" ]; then
+            echo "Error: ${MGMT_API_DIR}/libs/datastax-mgmtapi-server.jar not found!"
             exit 1
         fi
 
         # Check if cassandra-env.sh contains the javaagent line
-        expected_agent_path="${MGMT_API_DIR}/datastax-mgmtapi-agent.jar"
+        expected_agent_path="${MGMT_API_DIR}/libs/datastax-mgmtapi-agent.jar"
 
         if ! grep -q "javaagent:${expected_agent_path}" "${CASSANDRA_CONF}/cassandra-env.sh"; then
             echo "Error: ${CASSANDRA_CONF}/cassandra-env.sh does not contain required javaagent line for management API"
@@ -49,7 +49,7 @@ function start_cassandra () {
             --clear-groups \
             --reuid snap_daemon \
             --regid snap_daemon -- \
-            ${JAVA_HOME}/bin/java -jar ${MGMT_API_DIR}/datastax-mgmtapi-server.jar -S /tmp/db.sock -H tcp://127.0.0.1:${MGMT_API_PORT}
+            ${JAVA_HOME}/bin/java -jar ${MGMT_API_DIR}/libs/datastax-mgmtapi-server.jar -S /tmp/db.sock -H tcp://127.0.0.1:${MGMT_API_PORT}
     else
         echo "Starting Cassandra..."
         "${SNAP}"/usr/bin/setpriv \
