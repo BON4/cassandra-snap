@@ -1,19 +1,13 @@
-[project]
-name = "cassandra-snap"
-version = "5.0.4"
-description = ""
-authors = [
-    {name = "Your Name",email = "you@example.com"}
-]
-readme = "README.md"
-requires-python = ">=3.12"
-dependencies = [
-]
+[tool.poetry]
+package-mode = false
 
+[tool.poetry.dependencies]
+python = "^3.10"
 
-[build-system]
-requires = ["poetry-core>=2.0.0,<3.0.0"]
-build-backend = "poetry.core.masonry.api"
+[tool.poetry.group.format]
+optional = true
+
+[tool.poetry.group.format.dependencies]
 
 [tool.poetry.group.lint]
 optional = true

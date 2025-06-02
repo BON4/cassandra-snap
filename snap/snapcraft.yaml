@@ -3,8 +3,11 @@ base: core24
 
 version: 5.0.4
 
-summary: 'TODO'
-description: 'TODO'
+summary: Snap for Apache Cassandra – a distributed NoSQL database
+description: |
+  This snap provides Apache Cassandra, a highly scalable, high-performance
+  distributed database. This snap is intended for use with operators
+  or in containerized environments and supports integration with Juju charms.
 
 grade: stable
 confinement: devmode
@@ -12,7 +15,7 @@ confinement: devmode
 platforms:
   amd64:
 
-title: Appache Cassandra
+title: Apache Cassandra
 website: https://github.com/apache/cassandra
 license: Apache-2.0
 
@@ -60,10 +63,10 @@ environment:
   CASSANDRA_HOME: ${SNAP_DATA_CURRENT}/opt/cassandra
 
   CASSANDRA_LIB: ${CASSANDRA_HOME}/lib
-  
+
   CASSANDRA_CONF: ${SNAP_DATA_CURRENT}/etc/cassandra
   CASSANDRA_PATH_CERTS: ${SNAP_DATA_CURRENT}/etc/cassandra/certificates
-    
+
   PATH: ${CASSANDRA_BIN}:${CASSANDRA_HOME}:${JAVA_HOME}/bin:$PATH
 
   CASSANDRA_LOG_DIR: ${SNAP_COMMON}/var/log/cassandra
@@ -78,8 +81,7 @@ environment:
   MGMT_API_LOG_DIR: ${CASSANDRA_LOG_DIR}
   MGMT_API_DISABLE_MCAC: "true"
 
-  USER_SPECIFIED_PYTHON: ${SNAP_CURRENT}/usr/bin/python3.9 # needed for cqlsh, becouse it is not compatible with default v3.12
-
+  USER_SPECIFIED_PYTHON: ${SNAP_CURRENT}/usr/bin/python3.9
 
 apps:
   daemon:
@@ -183,8 +185,8 @@ parts:
       - libzstd1
       - iproute2
       - numactl
-      - libev4t64 #TODO: remove in future. This is needed for python cassandra-driver package to work in charm
-      
+      - libev4t64
+
   wrapper-scripts:
     plugin: nil
     source: ./scripts
@@ -193,17 +195,23 @@ parts:
       target_dir="${CRAFT_PART_INSTALL}/opt/cassandra"
       mkdir -p "${target_dir}"
       cp -r wrappers/. "${target_dir}"
-      cp -r helpers/ "${target_dir}/helpers"  
+      cp -r helpers/ "${target_dir}/helpers"
 
   mgmt-api:
     plugin: nil
-    source: https://github.com/k8ssandra/management-api-for-apache-cassandra/releases/download/v0.1.104/jars.zip
+    source: >-
+      https://github.com/k8ssandra/management-api-for-apache-cassandra/releases/download/v0.1.104/jars.zip
     build-packages:
       - unzip
     override-build: |
       mkdir -p ${CRAFT_PART_INSTALL}/opt/mgmt-api
-      cp management-api-agent-5.0.x/target/datastax-mgmtapi-agent-5.0.x-0.1.104.jar -d ${CRAFT_PART_INSTALL}/opt/mgmt-api/datastax-mgmtapi-agent.jar
-      cp management-api-server/target/datastax-mgmtapi-server-0.1.104.jar -d ${CRAFT_PART_INSTALL}/opt/mgmt-api/datastax-mgmtapi-server.jar
+      agent_dir="management-api-agent-5.0.x"
+      server_dir = "management-api-server"
+
+      cp ${agent_dir}/target/datastax-mgmtapi-agent-5.0.x-0.1.104.jar \
+        -d ${CRAFT_PART_INSTALL}/opt/mgmt-api/datastax-mgmtapi-agent.jar
+      cp ${server_dir}/target/datastax-mgmtapi-server-0.1.104.jar \
+        -d ${CRAFT_PART_INSTALL}/opt/mgmt-api/datastax-mgmtapi-server.jar
 
   cassandra:
     plugin: nil
@@ -215,39 +223,35 @@ parts:
       - openjdk-11-jre-headless
     stage-packages:
       - openjdk-11-jdk-headless
-      - python3.9 
+      - python3.9
     override-build: |
-      # update deps
-      apt-get update; apt-get upgrade -y; apt-get autoremove --purge -y; apt-get clean -y
+      apt-get update
+      apt-get upgrade -y
+      apt-get autoremove --purge -y
+      apt-get clean -y
       update-ca-certificates -f
 
-      # setup trust store
       trust_store="${CRAFT_PART_INSTALL}/etc/ssl/certs/java/"
       mkdir -p "${trust_store}"
       cp /etc/ssl/certs/java/cacerts "${trust_store}"
 
-      # download cassandra tarball
       version="$(craftctl get version)"
       patch="ubuntu1"
-
       archive="cassandra-${version}-${patch}-linux-x64.tar.gz"
       url="https://dlcdn.apache.org/cassandra/${version}/apache-cassandra-${version}-bin.tar.gz"
       curl -L -o "${archive}" "${url}"
       tar -xzvf "${archive}" -C "${CRAFT_PART_INSTALL}/" --strip-components=1
 
       mkdir -p "${CRAFT_PART_INSTALL}/opt/cassandra"
-
       mkdir -p "${CRAFT_PART_INSTALL}/etc/cassandra"
       mv "${CRAFT_PART_INSTALL}"/conf/* "${CRAFT_PART_INSTALL}/etc/cassandra/"
 
-      declare -a resources=(
-          bin lib tools pylib doc LICENSE.txt NOTICE.txt
-      )
+      declare -a resources=(bin lib tools pylib doc LICENSE.txt NOTICE.txt)
       for res in "${resources[@]}"; do
-          mv "${CRAFT_PART_INSTALL}/${res}" "${CRAFT_PART_INSTALL}/opt/cassandra"
+          mv "${CRAFT_PART_INSTALL}/${res}" \
+          "${CRAFT_PART_INSTALL}/opt/cassandra"
 
           target="${CRAFT_PART_INSTALL}/opt/cassandra/$(basename "${res}")"
-      
           if [ -d "${target}" ]; then
               chmod -R 755 "${target}"
           elif [ -f "${target}" ]; then
@@ -255,12 +259,8 @@ parts:
           fi
       done
 
-      # Final clean-up
       rm "${archive}"
-
       declare -a resources=(CHANGES.txt NEWS.txt CASSANDRA-*.txt .snyk)
       for res in "${resources[@]}"; do
           rm -rf "${CRAFT_PART_INSTALL}/${res}"
       done
-    
-  
