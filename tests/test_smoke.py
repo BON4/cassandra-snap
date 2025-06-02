@@ -23,7 +23,7 @@ def is_snap_installed():
 
 def cassandra_stress_available():
     try:
-        subprocess.run(["snap", "run", "cassandra.stress", "help"], check=True)
+        subprocess.run(["sudo", "snap", "run", "cassandra.stress", "help"], check=True)
         return True
     except Exception:
         return False
