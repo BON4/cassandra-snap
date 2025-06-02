@@ -87,13 +87,16 @@ jobs:
       - name: Upgrade snap
         run: |
           version="$(cat snap/snapcraft.yaml | yq .version)"
-          sudo snap install cassandra_${version}_amd64.snap --dangerous --jailmode
+          sudo snap install cassandra_${version}_amd64.snap --dangerous
 
           if [ "$(ls /var/snap/cassandra/x2)" ]; then
               echo "Snap upgraded."
           else
               exit 1
           fi
+
+          # start cassnadra
+          sudo snap start cassandra.daemon
 
           # wait a bit for it to fully initialize
           sleep 240s
