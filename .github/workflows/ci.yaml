@@ -56,7 +56,6 @@ jobs:
 
       - name: Setup and Start Cassandra
         run: |
-          sudo snap run cassandra.setup
           sudo snap start cassandra.daemon
           sleep 240s
 
