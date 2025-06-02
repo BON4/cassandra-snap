@@ -43,7 +43,5 @@ function file_copy () {
 }
 
 function copy_files_between_folder () {
-    cp -r "$1"* "$2"
-    chmod -R 770 "$2"
-    find "$2" -type f -exec chmod 660 {} \;
+    find "$1" -mindepth 1 -maxdepth 1 -exec cp -n -r "{}" "$2" \;
 }

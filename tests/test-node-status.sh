@@ -3,7 +3,7 @@ set -e
 
 echo "Running nodetool status..."
 
-OUTPUT=$(${CASSANDRA_BIN}/nodetool status)
+OUTPUT=$(sudo snap run cassandra.nodetool status)
 
 echo "$OUTPUT"
 

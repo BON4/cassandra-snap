@@ -116,21 +116,6 @@ apps:
       - system-observe
       - sys-fs-cgroup-service
 
-  test-node-status:
-    command: opt/cassandra/tests/test-node-status.sh
-    plugs:
-      - network
-      - network-bind
-
-  test-stress:
-    command: opt/cassandra/tests/test-stress.sh
-    plugs:
-      - network
-      - network-bind
-
-  setup:
-    command: opt/cassandra/setup.sh
-
   cassandra-bin:
     command: opt/cassandra/bin-wrapper.sh
     plugs:
@@ -162,6 +147,14 @@ apps:
       - network-bind
     environment:
       bin_script: cqlsh
+
+  stress:
+    command: opt/cassandra/tool-wrapper.sh
+    plugs:
+      - network
+      - network-bind
+    environment:
+      bin_script: cassandra-stress
 
   keytool:
     command: usr/lib/jvm/java-11-openjdk-amd64/bin/keytool
