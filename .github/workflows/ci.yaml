@@ -77,7 +77,7 @@ jobs:
           sudo snap start cassandra.daemon
 
           # wait a bit for it to fully initialize
-          sleep 90s
+          sleep 140s
 
       - name: Ensure the cluster is reachable and node created via tests
         run: |
