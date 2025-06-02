@@ -205,13 +205,15 @@ parts:
       - unzip
     override-build: |
       mkdir -p ${CRAFT_PART_INSTALL}/opt/mgmt-api
-      agent_dir="management-api-agent-5.0.x"
-      server_dir = "management-api-server"
 
-      cp ${agent_dir}/target/datastax-mgmtapi-agent-5.0.x-0.1.104.jar \
-        -d ${CRAFT_PART_INSTALL}/opt/mgmt-api/datastax-mgmtapi-agent.jar
-      cp ${server_dir}/target/datastax-mgmtapi-server-0.1.104.jar \
-        -d ${CRAFT_PART_INSTALL}/opt/mgmt-api/datastax-mgmtapi-server.jar
+      AGENT_JAR=management-api-agent-5.0.x
+      SERVER_JAR=management-api-server
+
+      cp "$AGENT_JAR"/target/datastax-mgmtapi-agent-5.0.x-0.1.104.jar \
+      ${CRAFT_PART_INSTALL}/opt/mgmt-api/datastax-mgmtapi-agent.jarb
+
+      cp "$SERVER_JAR"/target/datastax-mgmtapi-server-0.1.104.jar \
+      ${CRAFT_PART_INSTALL}/opt/mgmt-api/datastax-mgmtapi-server.jar
 
   cassandra:
     plugin: nil
