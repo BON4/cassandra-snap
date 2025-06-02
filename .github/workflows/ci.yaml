@@ -22,6 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     needs:
+      - lint    
       - build
     steps:
       - name: Checkout repo
@@ -32,6 +33,8 @@ jobs:
       - name: Install required dependencies
         run: |
           sudo snap install yq
+          pipx install tox
+          pipx install poetry	  
 
       - name: Download snap package(s)
         uses: actions/download-artifact@v4
@@ -60,9 +63,7 @@ jobs:
           sleep 240s
 
       - name: Ensure the cluster is reachable and node created via tests
-        run: |
-          set -e
-          bash tests/test-node-status.sh
+        run: tox run -e smoke
 
       - name: Upgrade snap
         run: |
@@ -80,6 +81,4 @@ jobs:
           sleep 240s
 
       - name: Ensure the cluster is reachable and node created after upgrade
-        run: |
-          set -e
-          bash tests/test-node-status.sh
+        run: tox run -e smoke

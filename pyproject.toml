@@ -1,0 +1,18 @@
+[project]
+name = "cassandra-snap"
+version = "5.0.4"
+description = ""
+authors = [
+    {name = "v.yurchenko@jazzserve.com"}
+]
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "pytest (>=8.3.5,<9.0.0)",
+    "pyyaml (>=6.0.2,<7.0.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
