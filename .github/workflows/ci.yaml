@@ -33,11 +33,11 @@ jobs:
         run: |
           sudo snap install yq
 
-      - name: Download snap file
+      - name: Download snap package(s)
         uses: actions/download-artifact@v4
         with:
-          name: cassandra_snap_amd64
-          path: .
+          pattern: ${{ needs.build.outputs.artifact-prefix }}-*
+          merge-multiple: true
 
       - name: Install snap file
         run: |
