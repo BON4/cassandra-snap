@@ -3,16 +3,30 @@ name = "cassandra-snap"
 version = "5.0.4"
 description = ""
 authors = [
-    {name = "v.yurchenko@jazzserve.com"}
+    {name = "Your Name",email = "you@example.com"}
 ]
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "pytest (>=8.3.5,<9.0.0)",
-    "pyyaml (>=6.0.2,<7.0.0)"
 ]
 
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.group.lint]
+optional = true
+
+[tool.poetry.group.lint.dependencies]
+yamllint = "^1.37.1"
+
+[tool.poetry.group.unit]
+optional = true
+
+[tool.poetry.group.unit.dependencies]
+pytest = "^8.3.5"
+pyyaml = "^6.0.2"
+
+[tool.pytest.ini_options]
+markers = ["run"]

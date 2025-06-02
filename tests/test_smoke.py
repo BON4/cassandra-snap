@@ -16,14 +16,14 @@ def run_command(cmd):
 
 def is_snap_installed():
     try:
-        subprocess.run(["snap", "--version"], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        subprocess.run(["snap", "--version"], check=True)
         return True
     except Exception:
         return False
 
 def cassandra_stress_available():
     try:
-        subprocess.run(["snap", "run", "cassandra.stress", "help"], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        subprocess.run(["snap", "run", "cassandra.stress", "help"], check=True)
         return True
     except Exception:
         return False
@@ -36,8 +36,32 @@ def test_install():
             ["sudo", "snap", "install", snap_file, "--devmode"],
             check=True,
         )
-
+        
 @pytest.mark.run(after="test_install")
+def check_nodetool_status():
+    if not is_snap_installed():
+        pytest.fail("[FAILED] snap command not found")
+    
+    print("Running nodetool status...")
+
+    try:
+        output = subprocess.check_output(
+            ['sudo', 'snap', 'run', 'cassandra.nodetool', 'status'],
+            text=True,
+            stderr=subprocess.STDOUT
+        )
+    except subprocess.CalledProcessError as e:
+        raise RuntimeError(f"Failed to run nodetool status: {e.output}") from e
+
+    print(output)
+
+    if "UN" in output:
+        print("Nodetool status is healthy: Node is Up and Normal.")
+    else:
+        raise RuntimeError("Nodetool status check failed! Node is not Up and Normal.")
+        
+
+@pytest.mark.run(after="check_nodetool_status")
 def test_write_stress():
     if not is_snap_installed():
         pytest.fail("[FAILED] snap command not found")
@@ -58,8 +82,15 @@ def test_write_stress():
         pytest.fail("[FAILED] WRITE test failed")
     print("[SUCCESS] WRITE test completed")
 
-@pytest.mark.run(after="test_install")
+@pytest.mark.run(after="check_nodetool_status")
 def test_read_stress():
+    if not is_snap_installed():
+        pytest.fail("[FAILED] snap command not found")
+
+    if not cassandra_stress_available():
+        pytest.fail("[FAILED] cassandra-stress is not installed or not available via snap")
+
+    
     print("▶ Starting READ test...")
     try:
         run_command([
