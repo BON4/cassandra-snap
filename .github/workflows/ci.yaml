@@ -82,7 +82,7 @@ jobs:
       - name: Ensure the cluster is reachable and node created via tests
         run: |
              set -e
-	     sudo lsof -i :9042
+             sudo lsof -i :9042
              sudo snap run cassandra.test-node-status
      
       - name: Upgrade snap
