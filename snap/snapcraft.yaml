@@ -141,13 +141,12 @@ apps:
       bin_script: stop-server
 
   cqlsh:
-    command: opt/cassandra/bin/bin-wrapper.sh
+    command: opt/cqlsh/bin/python-wrapper.sh
     plugs:
       - network
       - network-bind
     environment:
-      bin_script: cqlsh
-      USER_SPECIFIED_PYTHON: ${SNAP_CURRENT}/usr/bin/python3.9
+      bin: cqlsh
 
   stress:
     command: opt/cassandra/bin/tool-wrapper.sh
@@ -162,11 +161,6 @@ apps:
     plugs:
       - mount-observe
 
-package-repositories:
-  - type: apt
-    ppa: deadsnakes/ppa
-    priority: always
-
 parts:
   dependencies:
     plugin: nil
@@ -175,6 +169,7 @@ parts:
     stage-packages:
       - util-linux
       - openjdk-11-jre-headless
+      - python3
       - curl
       - net-tools
       - lsof
@@ -185,6 +180,11 @@ parts:
       - iproute2
       - numactl
       - libev4t64
+
+  cqlsh:
+    plugin: python
+    source: https://github.com/jeffwidman/cqlsh.git
+    source-tag: 6.2.0
 
   wrapper-scripts:
     plugin: nil
@@ -197,8 +197,12 @@ parts:
       target_shared_dir="${CRAFT_PART_INSTALL}/opt/shared/bin"
       mkdir -p "${target_shared_dir}"
 
+      target_cqlsh_dir="${CRAFT_PART_INSTALL}/opt/cqlsh/bin"
+      mkdir -p "${target_cqlsh_dir}"
+
       cp -r opt/cassandra/bin/* "${target_cassandra_dir}"
       cp -r opt/shared/bin/* "${target_shared_dir}"
+      cp -r opt/cqlsh/bin/* "${target_cqlsh_dir}"
 
   mgmt-api:
     plugin: nil
@@ -228,7 +232,6 @@ parts:
       - openjdk-11-jre-headless
     stage-packages:
       - openjdk-11-jdk-headless
-      - python3.9
     override-build: |
       apt-get update
       apt-get upgrade -y
