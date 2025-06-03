@@ -9,12 +9,7 @@ Charmed solution for Cassandra
 
 ### Setup
 ```
-    sudo snap connect cassandra:log-observe (reqired)
-    sudo snap connect cassandra:mount-observe ()
-    sudo snap connect cassandra:process-control
-    sudo snap connect cassandra:system-observe
-    sudo snap connect cassandra:sys-fs-cgroup-service
-    sudo snap connect cassandra:shmem-perf-analyzer
+make connect-interfaces
 ```
 
 To setup management server add this line to the end of the cassandra-env.sh file:
