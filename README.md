@@ -9,8 +9,8 @@ Charmed solution for Cassandra
 
 ### Setup
 ```
-    sudo snap connect cassandra:log-observe
-    sudo snap connect cassandra:mount-observe
+    sudo snap connect cassandra:log-observe (reqired)
+    sudo snap connect cassandra:mount-observe ()
     sudo snap connect cassandra:process-control
     sudo snap connect cassandra:system-observe
     sudo snap connect cassandra:sys-fs-cgroup-service

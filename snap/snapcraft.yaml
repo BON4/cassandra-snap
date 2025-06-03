@@ -20,7 +20,7 @@ website: https://github.com/apache/cassandra
 license: Apache-2.0
 
 system-usernames:
-  snap_daemon: shared
+  _daemon_: shared
 
 plugs:
   shmem-perf-analyzer:
@@ -52,7 +52,7 @@ environment:
   SNAP_CURRENT: /snap/cassandra/current
   SNAP_DATA_CURRENT: /var/snap/cassandra/current
   JAVA_HOME: ${SNAP}/usr/lib/jvm/java-11-openjdk-amd64
-  HOME: ${SNAP_COMMON}/home/snap_daemon
+  HOME: ${SNAP_COMMON}/home/_daemon_
 
   SNAP_LOG_DIR: ${SNAP_COMMON}/ops/snap/logs
   CASSANDRA_ROOT: ${SNAP_CURRENT}/opt/cassandra

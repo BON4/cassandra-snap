@@ -47,15 +47,15 @@ function start_cassandra () {
 	
         "${SNAP}"/usr/bin/setpriv \
             --clear-groups \
-            --reuid snap_daemon \
-            --regid snap_daemon -- \
+            --reuid _daemon_ \
+            --regid _daemon_ -- \
             ${JAVA_HOME}/bin/java -jar ${MGMT_API_DIR}/libs/datastax-mgmtapi-server.jar -S /tmp/db.sock -H tcp://127.0.0.1:${MGMT_API_PORT}
     else
         echo "Starting Cassandra..."
         "${SNAP}"/usr/bin/setpriv \
             --clear-groups \
-            --reuid snap_daemon \
-            --regid snap_daemon -- \
+            --reuid _daemon_ \
+            --regid _daemon_ -- \
             "${CASSANDRA_BIN}"/cassandra -f
     fi
 }
