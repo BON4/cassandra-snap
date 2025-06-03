@@ -207,7 +207,7 @@ parts:
     build-packages:
       - unzip
     override-build: |
-      mkdir -p ${CRAFT_PART_INSTALL}/opt/mgmt-api
+      mkdir -p ${CRAFT_PART_INSTALL}/opt/mgmt-api/libs
 
       AGENT_JAR=management-api-agent-5.0.x
       SERVER_JAR=management-api-server
