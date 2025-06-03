@@ -60,7 +60,10 @@ jobs:
       - name: Setup and Start Cassandra
         run: |
           sudo snap start cassandra.daemon
-          sleep 240s
+          until sudo snap services cassandra.daemon | grep -q "active"; do
+              echo "Waiting for Cassandra to be ready..."
+              sleep 240s
+          done	  
 
       - name: Ensure the cluster is reachable and node created via tests
         run: tox run -e smoke
@@ -78,7 +81,10 @@ jobs:
           fi
 
           sudo snap start cassandra.daemon
-          sleep 240s
+          until sudo snap services cassandra.daemon | grep -q "active"; do
+              echo "Waiting for Cassandra to be ready..."
+              sleep 240s
+          done	  
 
       - name: Ensure the cluster is reachable and node created after upgrade
         run: tox run -e smoke
