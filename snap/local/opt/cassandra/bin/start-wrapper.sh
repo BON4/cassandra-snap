@@ -18,14 +18,10 @@ for arg in "$@"; do
   esac
 done
 
-# TODO: make shure not to launch cassandra while mgmt-server is up, or vise versa. Maybe by checking /tmp/snap-private-tmp/snap.cassandra/tmp/cassandra.pid is exists
 function start_cassandra () {
-    exit_if_missing_perm "log-observe"
-    exit_if_missing_perm "mount-observe"
     exit_if_missing_perm "sys-fs-cgroup-service"
     exit_if_missing_perm "system-observe"
-
-    warn_if_missing_perm "process-control"
+    exit_if_missing_perm "process-control"
 
     if [ "$WITH_API" = true ]; then
         echo "Starting Cassandra with management API..."
