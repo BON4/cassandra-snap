@@ -56,7 +56,7 @@ function start_cassandra () {
             --clear-groups \
             --reuid _daemon_ \
             --regid _daemon_ -- \
-            "${CASSANDRA_BIN}"/cassandra -f
+            ${SNAP_CURRENT}/opt/cassandra/bin/cassandra -f
     fi
 }
 

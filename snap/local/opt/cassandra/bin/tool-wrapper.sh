@@ -6,4 +6,4 @@ set -e
     --clear-groups \
     --reuid _daemon_ \
     --regid _daemon_ -- \
-    ${CASSANDRA_TOOLS_BIN}/${bin_script} "${@}"
+    ${SNAP_CURRENT}/opt/cassandra/tools/bin/${bin_script} "${@}"
