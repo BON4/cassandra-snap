@@ -175,6 +175,7 @@ parts:
     plugin: nil
     source: >-
       https://github.com/k8ssandra/management-api-for-apache-cassandra/releases/download/v0.1.104/jars.zip
+    source-checksum: sha256:3fd7996186b6c7d0d4a78615f3a76adf9e36962f9f30bc761dba76d0047618c2
     build-packages:
       - unzip
     override-build: |
