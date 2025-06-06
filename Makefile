@@ -12,4 +12,6 @@ sysctl-tuning:
 
 enable-mgmtapi:
 	@echo "\nEnabling Management API..."
-	@echo 'JVM_OPTS="$$JVM_OPTS -javaagent:/snap/cassandra/current/opt/mgmt-api/libs/datastax-mgmtapi-agent.jar"' | sudo tee -a /var/snap/cassandra/current/etc/cassandra/cassandra-env.sh
+	@rev=$$(curl --silent --unix-socket /run/snapd.socket http://localhost/v2/snaps/cassandra | jq -r '.result.revision'); \
+	echo "JVM_OPTS=\"\$$JVM_OPTS -javaagent:/snap/cassandra/$${rev}/opt/mgmt-api/libs/datastax-mgmtapi-agent.jar\"" \
+	| sudo tee -a /var/snap/cassandra/current/etc/cassandra/cassandra-env.sh
