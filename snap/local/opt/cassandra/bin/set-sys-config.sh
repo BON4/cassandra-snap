@@ -22,7 +22,8 @@ function set_defaults () {
 
 # See: https://docs.datastax.com/en/cassandra-oss/3.0/cassandra/install/installRecommendSettings.html#Setuserresourcelimits
 function set_ulimits () {
-    exit_if_missing_perm "sys-fs-cgroup-service"
+    # TODO: is needed?
+    # exit_if_missing_perm "sys-fs-cgroup-service"
 
     echo "Setting Cassandra ulimits..."
 
