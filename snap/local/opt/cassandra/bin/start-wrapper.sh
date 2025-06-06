@@ -3,6 +3,7 @@
 set -eu
 
 source "${SNAP_CURRENT}"/opt/shared/bin/snap-interfaces.sh
+source "${SNAP_CURRENT}"/opt/cassandra/bin/set-sys-config.sh
 
 WITH_API=false
 
@@ -21,7 +22,7 @@ done
 function start_cassandra () {
     exit_if_missing_perm "system-observe"
     exit_if_missing_perm "process-control"
-    
+    exit_if_missing_perm "sys-fs-cgroup-service"
 
     if [ "$WITH_API" = true ]; then
         echo "Starting Cassandra with management API..."

@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+set -eux
+
+source "${SNAP_CURRENT}"/opt/shared/bin/snap-logger.sh "hook-configure"
+
+
+set_sysctl_props="$(snapctl get set-sysctl-props)"
+if [ -z "${set_sysctl_props}" ] || [ "${set_sysctl_props}" != "yes" ]; then
+    set_sysctl_props="no"
+fi
+snapctl set set-sysctl-props="${set_sysctl_props}"
