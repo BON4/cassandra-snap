@@ -22,16 +22,6 @@ license: Apache-2.0
 system-usernames:
   _daemon_: shared
 
-plugs:
-  shmem-perf-analyzer:
-    interface: shared-memory
-    private: true
-
-  sys-fs-cgroup-service:
-    interface: system-files
-    read:
-      - /sys/fs/cgroup/system.slice/snap.cassandra.daemon.service
-
 slots:
   logs:
     interface: content
@@ -44,14 +34,12 @@ hooks:
     plugs:
       - network
       - network-bind
-      - shmem-perf-analyzer
     environment:
       CASSANDRA_HINTS_DIR: ${SNAP_COMMON}/var/lib/cassandra/hints
       CASSANDRA_DATA_DIR: ${SNAP_COMMON}/var/lib/cassandra/data
       CASSANDRA_COMMIT_LOG_DIR: ${SNAP_COMMON}/var/lib/cassandra/commitlog
       CASSANDRA_SAVED_CACHES_DIR: ${SNAP_COMMON}/var/lib/cassandra/saved_caches
-
-
+      
 environment:
   SNAP_CURRENT: /snap/cassandra/current
   SNAP_DATA_CURRENT: /var/snap/cassandra/current
@@ -77,12 +65,8 @@ apps:
       - network
       - network-bind
       - hardware-observe
-      - log-observe
-      - mount-observe
       - process-control
-      - shmem-perf-analyzer
       - system-observe
-      - sys-fs-cgroup-service
 
   mgmt-server:
     daemon: simple
@@ -94,12 +78,8 @@ apps:
       - network
       - network-bind
       - hardware-observe
-      - log-observe
-      - mount-observe
       - process-control
-      - shmem-perf-analyzer
       - system-observe
-      - sys-fs-cgroup-service
     environment:
       MGMT_API_LOG_DIR: ${CASSANDRA_LOG_DIR}
       MGMT_API_DISABLE_MCAC: "true"
